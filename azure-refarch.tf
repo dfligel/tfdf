@@ -1,6 +1,6 @@
 # Create a resource group
 resource "azurerm_resource_group" "rg" {
-  name     = "tfrefarch1"
+  name     = "${var.resource_group}"
   location = "UK South"
 }
 
@@ -12,7 +12,7 @@ resource "azurerm_virtual_network" "network" {
 
     subnet {
     name           = "subnet1"
-    address_prefix = "10.99.99.0/24"
+    address_prefix = "10.99.98.0/24"
   }
 }
 
