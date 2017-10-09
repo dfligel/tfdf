@@ -17,6 +17,13 @@ resource "azurerm_subnet" "test" {
   address_prefix       = "10.99.99.0/24"
 }
 
+resource "azurerm_subnet" "test2" {
+  name                 = "transdata2"
+  resource_group_name  = "${azurerm_resource_group.test.name}"
+  virtual_network_name = "${azurerm_virtual_network.test.name}"
+  address_prefix       = "10.99.98.0/24"
+}
+
 resource "azurerm_network_interface" "test" {
   name                = "fg1nic1"
   location            = "UK South"
@@ -39,7 +46,7 @@ resource "azurerm_network_interface" "test2" {
 
   ip_configuration {
     name                          = "testconfiguration2"
-    subnet_id                     = "${azurerm_subnet.test.id}"
+    subnet_id                     = "${azurerm_subnet.test2.id}"
     private_ip_address_allocation = "dynamic"
     }
 }
@@ -65,6 +72,7 @@ resource "azurerm_virtual_machine" "test" {
   location              = "UK South"
   resource_group_name   = "${azurerm_resource_group.test.name}"
   network_interface_ids = ["${azurerm_network_interface.test.id}","${azurerm_network_interface.test2.id}"]
+  primary_network_interface_id = "${azurerm_network_interface.test.id}"
   vm_size               = "Standard_DS2_v2"
 
 plan {
