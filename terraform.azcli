@@ -1,0 +1,12 @@
+#AZ CLI Login
+az login
+
+#Get list of VMs
+az vm list -d --output table
+
+# Get lsit of Azure Features
+az feature list --output table --verbose
+
+# Register for Preview LB 
+az feature register --name AllowLBPreview --namespace Microsoft.Network
+
