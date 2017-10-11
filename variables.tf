@@ -5,5 +5,5 @@ variable "resource_group" {
 
 variable "vnet_transit" {
   description = "NAme of the first VNET (transit)"
-  default = TRANSIT
+  default = "TRANSIT"
 }
