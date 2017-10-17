@@ -1,134 +1,135 @@
-resource "azurerm_resource_group" "test" {
-  name     = "tfrefarch"
-  location = "UK South"
+terraform {
+	  backend "local" {
+			path = "./terraform.tfstate"
+	  }
 }
 
-resource "azurerm_virtual_network" "test" {
-  name                = "trans"
-  address_space       = ["10.99.0.0/16"]
-  location            = "UK South"
-  resource_group_name = "${azurerm_resource_group.test.name}"
+output "rgname" {
+	value =  "${azurerm_resource_group.rg1.name}"
 }
 
-resource "azurerm_subnet" "test" {
-  name                 = "transdata"
-  resource_group_name  = "${azurerm_resource_group.test.name}"
-  virtual_network_name = "${azurerm_virtual_network.test.name}"
-  address_prefix       = "10.99.99.0/24"
+output "sub_trans_data_id" {
+	value =  "${azurerm_subnet.trans_data.id}"
 }
 
-resource "azurerm_subnet" "test2" {
-  name                 = "transdata2"
-  resource_group_name  = "${azurerm_resource_group.test.name}"
-  virtual_network_name = "${azurerm_virtual_network.test.name}"
-  address_prefix       = "10.99.98.0/24"
+output "sub_trans_control_id" {
+	value =  "${azurerm_subnet.trans_control.id}"
 }
 
-resource "azurerm_network_interface" "test" {
-  name                = "fg1nic1"
-  location            = "UK South"
-  resource_group_name = "${azurerm_resource_group.test.name}"
-  enable_ip_forwarding = "true"
-
-  ip_configuration {
-    name                          = "testconfiguration1"
-    subnet_id                     = "${azurerm_subnet.test.id}"
-    private_ip_address_allocation = "dynamic"
-    public_ip_address_id          = "${azurerm_public_ip.pip.id}"
-  }
+resource "azurerm_resource_group" "rg1" {
+  name     = "${var.rg1}"
+  location = "${var.region}"
 }
 
-resource "azurerm_network_interface" "test2" {
-  name                = "fg1nic2"
-  location            = "UK South"
-  resource_group_name = "${azurerm_resource_group.test.name}"
-  enable_ip_forwarding = "true"
-
-  ip_configuration {
-    name                          = "testconfiguration2"
-    subnet_id                     = "${azurerm_subnet.test2.id}"
-    private_ip_address_allocation = "dynamic"
-    }
+resource "azurerm_virtual_network" "transit" {
+  name                = "${var.vnet_transit}"
+  address_space       = ["${var.vnet_transit_cidr}"]
+  location            = "${azurerm_resource_group.rg1.location}"
+  resource_group_name = "${azurerm_resource_group.rg1.name}"
 }
 
-resource "azurerm_public_ip" "pip" {
-  name                         = "FG1PIP2"
-  location                     = "UK South"
-  resource_group_name          = "${azurerm_resource_group.test.name}"
-  public_ip_address_allocation = "Dynamic"
+resource "azurerm_virtual_network" "services1" {
+  name                = "${var.vnet_services1}"
+  address_space       = ["${var.vnet_services1_cidr}"]
+  location            = "${azurerm_resource_group.rg1.location}"
+  resource_group_name = "${azurerm_resource_group.rg1.name}"
 }
 
-resource "azurerm_managed_disk" "test" {
-  name                 = "datadisk_existing"
-  location             = "UK South"
-  resource_group_name  = "${azurerm_resource_group.test.name}"
-  storage_account_type = "Standard_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "10"
+resource "azurerm_virtual_network" "services2" {
+  name                = "${var.vnet_services2}"
+  address_space       = ["${var.vnet_services2_cidr}"]
+  location            = "${azurerm_resource_group.rg1.location}"
+  resource_group_name = "${azurerm_resource_group.rg1.name}"
 }
 
-resource "azurerm_virtual_machine" "test" {
-  name                  = "transFG1"
-  location              = "UK South"
-  resource_group_name   = "${azurerm_resource_group.test.name}"
-  network_interface_ids = ["${azurerm_network_interface.test.id}","${azurerm_network_interface.test2.id}"]
-  primary_network_interface_id = "${azurerm_network_interface.test.id}"
-  vm_size               = "Standard_DS2_v2"
+resource "azurerm_subnet" "trans_data" {
+  name                 = "${var.vnet_transit}_${var.sub_trans_data}"
+  resource_group_name  = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name = "${azurerm_virtual_network.transit.name}"
+  address_prefix       = "${var.sub_trans_data_cidr}"
+}
 
-plan {
-    name = "fortinet_fg-vm_payg"
-    product = "fortinet_fortigate-vm_v5"
-    publisher = "fortinet"
-      }
+resource "azurerm_subnet" "trans_control" {
+  name                 = "${var.vnet_transit}_${var.sub_trans_ctrl}"
+  resource_group_name  = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name = "${azurerm_virtual_network.transit.name}"
+  address_prefix       = "${var.sub_trans_ctrl_cidr}"
+}
 
-  # Uncomment this line to delete the OS disk automatically when deleting the VM
-  delete_os_disk_on_termination = true
+resource "azurerm_subnet" "serv1_front" {
+  name                 = "${var.vnet_services1}_${var.sub_serv1_front}"
+  resource_group_name  = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name = "${azurerm_virtual_network.services1.name}"
+  address_prefix       = "${var.sub_serv1_front_cidr}"
+}
 
-  # Uncomment this line to delete the data disks automatically when deleting the VM
-  delete_data_disks_on_termination = true
+resource "azurerm_subnet" "serv1_back" {
+  name                 = "${var.vnet_services1}_${var.sub_serv1_back}"
+  resource_group_name  = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name = "${azurerm_virtual_network.services1.name}"
+  address_prefix       = "${var.sub_serv1_back_cidr}"
+}
 
-storage_image_reference {
-    publisher = "fortinet"
-    offer     = "fortinet_fortigate-vm_v5"
-    sku       = "fortinet_fg-vm_payg"
-    version   = "5.6.2"
-  }
+resource "azurerm_subnet" "serv2_front" {
+  name                 = "${var.vnet_services2}_${var.sub_serv2_front}"
+  resource_group_name  = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name = "${azurerm_virtual_network.services2.name}"
+  address_prefix       = "${var.sub_serv2_front_cidr}"
+}
 
-  storage_os_disk {
-    name              = "myosdisk1"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
+resource "azurerm_subnet" "serv2_back" {
+  name                 = "${var.vnet_services2}_${var.sub_serv2_back}"
+  resource_group_name  = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name = "${azurerm_virtual_network.services2.name}"
+  address_prefix       = "${var.sub_serv2_back_cidr}"
+}
 
-  # Optional data disks
-  storage_data_disk {
-    name              = "datadisk_new"
-    managed_disk_type = "Standard_LRS"
-    create_option     = "Empty"
-    lun               = 0
-    disk_size_gb      = "10"
-  }
+resource "azurerm_virtual_network_peering" "trans_svc1" {
+  name                      = "${var.peer_trans_svc1}"
+  resource_group_name       = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name      = "${azurerm_virtual_network.transit.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.services1.id}"
+	allow_virtual_network_access = "true"
+	allow_forwarded_traffic      = "true"
+}
 
-  storage_data_disk {
-    name            = "${azurerm_managed_disk.test.name}"
-    managed_disk_id = "${azurerm_managed_disk.test.id}"
-    create_option   = "Attach"
-    lun             = 1
-    disk_size_gb    = "${azurerm_managed_disk.test.disk_size_gb}"
-  }
+resource "azurerm_virtual_network_peering" "svc1_trans" {
+  name                      = "${var.peer_svc1_trans}"
+  resource_group_name       = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name      = "${azurerm_virtual_network.services1.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.transit.id}"
+	allow_virtual_network_access = "true"
+}
 
-  os_profile {
-    computer_name  = "TRANSFG1"
-    admin_username = "fgadmin"
-    admin_password = "Fortinet123!"
-  }
+resource "azurerm_virtual_network_peering" "trans_svc2" {
+  name                      = "${var.peer_trans_svc2}"
+  resource_group_name       = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name      = "${azurerm_virtual_network.transit.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.services2.id}"
+	allow_virtual_network_access = "true"
+	allow_forwarded_traffic      = "true"
+}
 
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
+resource "azurerm_virtual_network_peering" "svc2_trans" {
+  name                      = "${var.peer_svc2_trans}"
+  resource_group_name       = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name      = "${azurerm_virtual_network.services2.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.transit.id}"
+	allow_virtual_network_access = "true"
+}
 
-  tags {
-    environment = "staging"
-  }
+resource "azurerm_virtual_network_peering" "svc1_svc2" {
+  name                      = "${var.peer_svc1_svc2}"
+  resource_group_name       = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name      = "${azurerm_virtual_network.services1.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.services2.id}"
+	allow_virtual_network_access = "true"
+}
+
+resource "azurerm_virtual_network_peering" "svc2_svc1" {
+  name                      = "${var.peer_svc2_svc1}"
+  resource_group_name       = "${azurerm_resource_group.rg1.name}"
+  virtual_network_name      = "${azurerm_virtual_network.services2.name}"
+  remote_virtual_network_id = "${azurerm_virtual_network.services1.id}"
+	allow_virtual_network_access = "true"
 }

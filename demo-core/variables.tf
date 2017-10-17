@@ -1,9 +1,26 @@
-variable "resource_group" {
-  description = "The name of the resource group in which the virtual networks are created"
-  default     = "tfrefarch1"
-}
-
-variable "vnet_transit" {
-  description = "NAme of the first VNET (transit)"
-  default = "TRANSIT"
-}
+variable "region" {}
+variable "rg1" {}
+variable "vnet_transit" {}
+variable "vnet_services1" {}
+variable "vnet_services2" {}
+variable "sub_trans_data" {}
+variable "sub_trans_ctrl" {}
+variable "sub_serv1_front" {}
+variable "sub_serv1_back" {}
+variable "sub_serv2_front" {}
+variable "sub_serv2_back" {}
+variable "vnet_transit_cidr" {}
+variable "vnet_services1_cidr" {}
+variable "vnet_services2_cidr" {}
+variable "sub_trans_data_cidr" {}
+variable "sub_trans_ctrl_cidr" {}
+variable "sub_serv1_front_cidr" {}
+variable "sub_serv1_back_cidr" {}
+variable "sub_serv2_front_cidr" {}
+variable "sub_serv2_back_cidr" {}
+variable "peer_trans_svc1" {}
+variable "peer_trans_svc2" {}
+variable "peer_svc1_trans" {}
+variable "peer_svc2_trans" {}
+variable "peer_svc1_svc2" {}
+variable "peer_svc2_svc1" {}
