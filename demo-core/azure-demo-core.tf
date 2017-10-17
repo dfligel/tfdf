@@ -5,15 +5,28 @@ terraform {
 }
 
 output "rgname" {
-	value =  "${azurerm_resource_group.rg1.name}"
+	value = "${azurerm_resource_group.rg1.name}"
 }
-
+output "region" {
+	value = "${azurerm_resource_group.rg1.location}"
+}
 output "sub_trans_data_id" {
 	value =  "${azurerm_subnet.trans_data.id}"
 }
-
 output "sub_trans_control_id" {
 	value =  "${azurerm_subnet.trans_control.id}"
+}
+output "sub_serv1_front_id" {
+	value =  "${azurerm_subnet.serv1_front.id}"
+}
+output "sub_serv1_back_id" {
+	value =  "${azurerm_subnet.serv1_back.id}"
+}
+output "sub_serv2_front_id" {
+	value =  "${azurerm_subnet.serv2_front.id}"
+}
+output "sub_serv2_back_id" {
+	value =  "${azurerm_subnet.serv2_back.id}"
 }
 
 resource "azurerm_resource_group" "rg1" {
