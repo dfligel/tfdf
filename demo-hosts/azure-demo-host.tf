@@ -90,19 +90,20 @@ plan {
   # Uncomment this line to delete the data disks automatically when deleting the VM
   delete_data_disks_on_termination = true
 
-	provisioner "remote-exec" {
-		inline = [
-			"config system global",
-			"set admintimeout 60",
-			"end",
-		]
+	# provisioner "remote-exec" {
+	# 	inline = [
+	# 		"config system global",
+	# 		"set admintimeout 60",
+	# 		"end",
+	# 	]
 
-		connection {
-			type = "ssh"
-			user = "${var.fg1_vm_os_user}"
-			password = "${var.fg1_vm_os_pass}"
-	}	
-}
+		# connection {
+		# 	type = "ssh"
+		# 	host = "${azurerm_public_ip.pip1.ip_address}"
+		# 	user = "${var.fg1_vm_os_user}"
+		# 	password = "${var.fg1_vm_os_pass}"
+	# }	
+# }
 storage_image_reference {
     publisher = "${var.fg1_vm_image_publisher}"
     offer     = "${var.fg1_vm_image_offer}"

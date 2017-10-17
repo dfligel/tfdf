@@ -1,4 +1,4 @@
-region							= "West Europe"
+region							= "UK South"
 rg1									= "TFREFARCH"
 vnet_transit				= "TRANSIT"
 vnet_services1			= "SERVICES1"
